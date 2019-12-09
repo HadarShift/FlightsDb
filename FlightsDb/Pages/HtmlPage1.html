@@ -1,0 +1,201 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <meta charset="utf-8" />
+    <title></title>
+    <link href="StyleSheet1.css" rel="stylesheet" />
+    <script src="../Scripts/ajaxCalls.js"></script>
+    <script src="../Scripts/bootstrap.js"></script>
+    <script>
+
+
+        $(document).ready(function () {
+            $("#Search").click(function () {
+                getFlights();
+            });
+            $("#Show").click(function () {
+                showFlights();
+            });
+            $("#ConButton").click(function () {
+                showFiltered();
+            })
+        });
+
+        function FlightsCode(CountryName, CountryCode) {
+            this.CountryName = CountryName;
+            this.CountryCode = CountryCode;
+            this.Price = Price;
+        }
+
+        
+
+        //קבלת שמות של כל ערי הטיסות
+        function getFlights() {
+         
+            //רציתי להכניס את שמות כל הערים בעולם
+            //CountryFrom = arrNamesCodes.find(e => e.CountryName == $("#CountryFrom").val());
+            //CountryTo = arrNamesCodes.find(e => e.CountryName == $("#CountryTo").val());
+            //console.log(CountryFrom.CountryCode + " " + CountryTo.CountryCode);
+            CityFrom = $("#CountryFrom").val();
+            CityTo = $("#CountryTo").val();
+            DateFrom = $("#DateFrom").val();
+            var datearrayFrom = DateFrom.split("-");
+            DateTo = $("#DateTo").val();
+            var datearrayTo = DateTo.split("-");
+            api = "https://api.skypicker.com/flights?flyFrom=" + CityFrom + "&amp;to=" + CityTo + "&amp;dateFrom=" + datearrayFrom[2] + '/' + datearrayFrom[1] + '/' + datearrayFrom[0] + "&amp;dateTo=" + datearrayTo[2] + '/' + datearrayTo[1] + '/' + datearrayTo[0] + "&amp;partner=benny";
+            ajaxCall("GET", api, "", getFlightsSuccess, getFlightsError);
+        }
+
+    
+
+      
+
+        function getFlightsSuccess(data) {
+            console.log(data["data"]);
+            document.getElementById("AllFlights").innerHTML = ""
+            data1 = data["data"]
+            routsArr = [];
+
+            str = "";
+            for (var i = 0; i < data1.length; i++) {             
+    
+                str += `<div class="Flights" id=${i}>                        
+                           <h1 id=from${i}>${data1[i]["cityFrom"]}</h1> 
+                            <h1 id=to${i}> to ${data1[i]["cityTo"]}</h1> 
+                           <h3 id=dateD${i}>date Departure: ${new Date(data1[i].dTimeUTC * 1000)} </h3><h3 id=dateA${i}> and arrive at: ${new Date(data1[i].aTimeUTC * 1000)}</h3>
+                           <h3>Price</h3>  <h3 id=Price${i}>${data1[i].conversion.EUR}</h3>  <h3>eur</h3>
+                            <p>route: ${data1[i]["cityFrom"]}==></p>`
+
+                var RoutesConnection = {
+                    "i": i,
+                    "cities": []
+                }
+
+                for (var j = 0; j < data1[i]["route"].length; j++) {
+                    if (j == data1[i]["route"].length-1)
+                        str += `<p>${data1[i].route[j].cityTo}</p>`
+                    else
+                        str += `<p>${data1[i].route[j].cityTo}==></p>`  
+
+                    RoutesConnection.cities.push(data1[i].route[j].cityTo);//מערך שמות בתוך אובייקט רוטס
+                }
+                str += `<input type="button" value="הוסף" id=b${i} onclick="addFlight(${i})"/>
+                        </div>`
+                routsArr.push(RoutesConnection);//מערך קונקשיינים
+
+            }
+            document.getElementById("AllFlights").innerHTML = str;
+
+            //$.ajax({
+            //    type: "POST",
+            //    url: '../api/Flights',
+            //}).done(function () {
+            //    alert('Added');
+            //});
+        }
+
+        
+
+        function getFlightsError(err) {
+            console.log(err);
+        }
+
+        function addFlight(id) {
+            for (var i = 0; i < length; i++) {
+
+            }
+            var flight = {
+                "Price": document.getElementById(`Price${id}`).textContent,
+                "cityFrom": document.getElementById(`from${id}`).textContent,
+                "cityTo": document.getElementById(`to${id}`).textContent,
+                "dateFrom": document.getElementById(`dateD${id}`).textContent,
+                "dateUntil": document.getElementById(`dateA${id}`).textContent,
+                "Routes": routsArr[id].cities
+                //"subflights": document.getElementById(`subflights${index}`).innerHTML,
+                //"airlines": document.getElementById(`airlines${index}`).textContent
+            }
+            ajaxCall("POST", "../api/Flight", JSON.stringify(flight), postFlightsSuccess, postFlightsError);
+        }
+
+        function showFlights() {
+            ajaxCall("GET", "../api/Flight", "", showFlightsSuccess, showFlightsError);
+        }
+
+        function showFiltered() {
+            cityOFstop = $("#Connection").val();
+            ajaxCall("GET", `../api/Flight/stop/${cityOFstop}`, showFlightsSuccess, showFlightsSuccess)
+        }
+
+
+        function postFlightsSuccess(data) {
+            console.log("in success");
+
+        }
+
+        function postFlightsError(err) {
+            console.log("in error")
+        }
+
+        function showFlightsSuccess(data) {
+            console.log("in success");
+            document.getElementById("AllFlights").innerHTML = "";//מחיקת הצגת כל הטיסות
+            str=""
+            for (var i = 0; i < data.length; i++) {
+
+                str += `<div class="Flights" id=${i}>                        
+                           <h1 id=from${i}>${data[i].cityFrom}</h1> 
+                            <h1 id=to${i}> to ${data[i].cityTo}</h1> 
+                           <h3 id=dateD${i}>date Departure: ${new Date(data[i].dateFrom)} </h3><h3 id=dateA${i}> and arrive at: ${new Date(data[i].dateUntil)}</h3>
+                           <h3>Price</h3>  <h3 id=Price${i}> ${data[i].Price}</h3><h3>eur</h3>`
+
+                for (var j = 0; j < data[i]["Routes"].length; j++) {
+                    if (j == data[i]["Routes"].length - 1)
+                        str += `<p>${data[i].Routes[j]}</p></div>`
+                    else
+                        str += `<p>${data[i].Routes[j]}==></p>`
+
+                }
+                        
+            }
+            document.getElementById("ResultFlights").innerHTML = str;         
+        }
+
+        function showFlightsError(err) {
+            console.log("in error")
+        }
+
+    </script>
+</head>
+<body>
+    <h1>Welcome to Shiftours</h1>
+    <div id="start">
+        יעד יציאה: <input type="text" name="Left" id="CountryFrom"><br>
+        יעד טיסה: <input type="text" name="Dest" id="CountryTo"><br>
+        עצירה ב: <input type="text" name="Dest" id="Connection"><br>
+
+        יציאה: <input type="date" id="DateFrom"><br>
+        חזור:<input type="date" id="DateTo"><br /> 
+        <input type="button" value="חפש" id="Search"  />
+        <input type="button" value="הצג טיסות" id="Show" />
+        <input type="button" value="הצג עם עצירות" id="ConButton" />
+    </div>
+    <div class="container" id="AllFlights">
+
+
+        <div class="Flights">
+            <h1>Prague To London</h1>
+            <h3>date: 23/10/2019</h3>
+            <h3>time:10:23 hours</h3>
+            <h3>price: 220$</h3>
+            <h5>routs: </h5>
+            <input type="button" value="הוסף" />
+        </div>
+
+  
+        </div>
+    <div class="container" id="ResultFlights">
+    </div>
+
+</body>
+</html>

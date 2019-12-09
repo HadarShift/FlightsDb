@@ -1,0 +1,9 @@
+﻿.Flights {
+    background-color:aqua;
+    width:30%;
+
+}
+
+.container p {
+    display: inline
+}
