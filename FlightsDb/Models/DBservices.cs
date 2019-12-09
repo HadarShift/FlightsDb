@@ -6,7 +6,7 @@ using System.Data.SqlClient;
 using System.Web.Configuration;
 using System.Data;
 using System.Text;
-
+using FlightsDb.Models;
 /// <summary>
 /// DBServices is a class created by me to provides some DataBase Services
 /// </summary>
@@ -87,7 +87,7 @@ public class DBservices
     //--------------------------------------------------------------------------------------------------
     // This method inserts a car to the movie table CLASSEX
     //--------------------------------------------------------------------------------------------------
-    public int insert(Movie movie)
+    public int insert(List<Destinations> destinations)
     {
 
         SqlConnection con;
@@ -95,7 +95,7 @@ public class DBservices
 
         try
         {
-            con = connect("carsDBConnectionString"); // create the connection
+            con = connect("destinationsDBConnectionString"); // create the connection
         }
         catch (Exception ex)
         {
@@ -103,15 +103,22 @@ public class DBservices
             throw (ex);
         }
 
-        String cStr = BuildInsertCommand(movie);      // helper method to build the insert string
-
-        cmd = CreateCommand(cStr, con);             // create the command
-
         try
         {
-            int numEffected = cmd.ExecuteNonQuery(); // execute the command
+            String cStr = "";
+            int numEffected = 0;
+            foreach (var item in destinations)
+            {
+                cStr = BuildInsertCommand(item);      // helper method to build the insert string
+                cmd = CreateCommand(cStr, con);             // create the command
+                numEffected += cmd.ExecuteNonQuery(); // execute the command
+
+            }
+
+
             return numEffected;
-        }
+            }
+
         catch (Exception ex)
         {
             return 0;
@@ -129,64 +136,24 @@ public class DBservices
         }
 
     }
-    //--------------------------------------------------------------------------------------------------
-    // This method inserts a car to the cars table 
-    //--------------------------------------------------------------------------------------------------
-    public int insert(Car car)
-    {
 
-        SqlConnection con;
-        SqlCommand cmd;
-
-        try
-        {
-            con = connect("carsDBConnectionString"); // create the connection
-        }
-        catch (Exception ex)
-        {
-            // write to log
-            throw (ex);
-        }
-
-        String cStr = BuildInsertCommand(car);      // helper method to build the insert string
-
-        cmd = CreateCommand(cStr, con);             // create the command
-
-        try
-        {
-            int numEffected = cmd.ExecuteNonQuery(); // execute the command
-            return numEffected;
-        }
-        catch (Exception ex)
-        {
-            return 0;
-            // write to log
-            throw (ex);
-        }
-
-        finally
-        {
-            if (con != null)
-            {
-                // close the db connection
-                con.Close();
-            }
-        }
-
-    }
 
     //--------------------------------------------------------------------
     // Build the Insert command method String for MOVIE CLASSEX
     //--------------------------------------------------------------------
-    private String BuildInsertCommand(Movie movie)
+    private String BuildInsertCommand(Destinations destination)
     {
+
         String command;
 
         StringBuilder sb = new StringBuilder();
         // use a string builder to create the dynamic string
-        sb.AppendFormat("Values('{0}', '{1}')", movie.Name, movie.Actor);
-        String prefix = "INSERT INTO movie_2020 " + "(Name, Actor) ";
-        command = prefix + sb.ToString();
+        String prefix = "";       
+            sb.AppendFormat("Values('{0}',{1},{2},'{3}')", destination.City, destination.LenLat, destination.LenLon, destination.Code);
+            prefix = "INSERT INTO Airport_2020 " + "(city, Lenlot,Leclong,code) ";
+            command = prefix + sb.ToString();
+
+        
 
         return command;
     }
@@ -210,21 +177,7 @@ public class DBservices
     }
 
 
-    //--------------------------------------------------------------------
-    // Build the Insert command String
-    //--------------------------------------------------------------------
-    private String BuildInsertCommand(Car car)
-    {
-        String command;
 
-        StringBuilder sb = new StringBuilder();
-        // use a string builder to create the dynamic string
-        sb.AppendFormat("Values('{0}', '{1}' ,{2}, {3})", car.Model, car.Manufacturer, car.Year.ToString(), car.Price.ToString());
-        String prefix = "INSERT INTO Cars_2020 " + "(model, manufacturer, year, price) ";
-        command = prefix + sb.ToString();
-
-        return command;
-    }
     //---------------------------------------------------------------------------------
     // Create the SqlCommand
     //---------------------------------------------------------------------------------

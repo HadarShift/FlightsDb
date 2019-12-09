@@ -12,5 +12,18 @@ namespace FlightsDb.Models
         public double LenLat { get; set; }
         public double LenLon { get; set; }
 
+        public Destinations()
+        {
+
+        }
+        /// <summary>
+        /// הכנסה לדטה בייס
+        /// </summary>
+        public void insertToDb(List<Destinations> destinations)
+        {
+            DBservices dBservices = new DBservices();
+            dBservices.insert(destinations);
+        }
+
     }
 }

@@ -38,6 +38,16 @@ namespace FlightsDb.Controllers
             Flights.flightsList.Add(flights);
 
         }
+        /// <summary>
+        /// שמירת יעדים בדטה בייס
+        /// </summary>
+        [HttpPost]
+        [Route("api/flight/destination")]
+        public void getDestinations([FromBody]List<Destinations> destinations)
+        {
+            Destinations d = new Destinations();
+            d.insertToDb(destinations);
+        }
 
         // PUT api/values/5
         public void Put(int id, [FromBody]string value)

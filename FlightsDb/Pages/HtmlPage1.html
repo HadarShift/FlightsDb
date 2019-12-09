@@ -36,15 +36,16 @@
         }
         function successCB(data) {
             console.log(data);
-            //let result = data.locations.map(a => a.city.name, a.code);
-            result = data.locations.map(a => obj={
+            Destinations = data.locations.map(a => obj={
                 "City": a.city.name,
                 "Code": a.code,
                 "LenLat": a.location.lat,
                 "LenLon": a.location.lon
             })
-            
+            //ajaxCall("POST", `../api/Flight/destinations`, JSON.stringify(Destinations), postFlightsSuccess, postFlightsError);
+            ajaxCall("POST", `../api/Flight/destination`, JSON.stringify(Destinations), postFlightsSuccess, postFlightsError);
 
+           
         }
         function errorCB(err) {
             console.log(err);
