@@ -43,10 +43,21 @@ namespace FlightsDb.Controllers
         /// </summary>
         [HttpPost]
         [Route("api/flight/destination")]
-        public void getDestinations([FromBody]List<Destinations> destinations)
+        public void postDestinations([FromBody]List<Destinations> destinations)
         {
             Destinations d = new Destinations();
             d.insertToDb(destinations);
+        }
+
+        //מקבל מהדטה בייס את הלוקיישנים
+        [HttpGet]
+        [Route("api/flight/Getdestination")]
+        public List<Destinations> GetFromDBDestinations()//
+        {
+            Destinations destinations = new Destinations();
+            List<Destinations> destinationsList = new List<Destinations>();
+            destinationsList= destinations.GetFromDBDestinations();
+            return destinationsList;
         }
 
         // PUT api/values/5

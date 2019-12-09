@@ -22,6 +22,8 @@ public class DBservices
         //
     }
 
+  
+
     //--------------------------------------------------------------------------------------------------
     // This method creates a connection to the database according to the connectionString name in the web.config 
     //--------------------------------------------------------------------------------------------------
@@ -158,6 +160,68 @@ public class DBservices
         return command;
     }
 
+    /// <summary>
+    /// מייבא נתונים מהדטה בייס על יעדים
+    /// </summary>
+    internal List<Destinations> importData()
+    {
+        List<Destinations> destinationsList = new List<Destinations>();
+        Destinations objDest = new Destinations();
+        SqlConnection con;
+        SqlCommand cmd;
+
+        try
+        {
+            con = connect("destinationsDBConnectionString"); // create the connection
+        }
+        catch (Exception ex)
+        {
+            // write to log
+            throw (ex);
+        }
+
+        try
+        {
+            String cStr = $@"SELECT *
+                        FROM Airport_2020"; ;
+            cmd = CreateCommand(cStr, con);             // create the command
+            SqlDataReader reader = cmd.ExecuteReader();
+            if (reader.HasRows)
+            {
+                while (reader.Read())
+                {
+                    objDest.City = reader["city"].ToString();
+                    objDest.LenLat = double.Parse(reader["Lenlot"].ToString());
+                    objDest.LenLon = double.Parse(reader["Leclong"].ToString());
+                    objDest.Code = reader["code"].ToString();
+                    destinationsList.Add(objDest);
+                }
+            }
+            else
+            {
+                Console.WriteLine("No rows found.");
+            }
+            reader.Close();
+
+        }
+
+        catch (Exception ex)
+        {
+            // write to log
+            throw (ex);
+        }
+
+        finally
+        {
+            if (con != null)
+            {
+                // close the db connection
+                con.Close();
+            }
+        }
+        return destinationsList;
+   
+    }
     //--------------------------------------------------------------------
     // Build the Insert command method String for MOVIE CLASSEX
     //--------------------------------------------------------------------

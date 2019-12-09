@@ -11,19 +11,22 @@ namespace FlightsDb.Models
         public string Code { get; set; }
         public double LenLat { get; set; }
         public double LenLon { get; set; }
-
+        DBservices dBservices;
         public Destinations()
         {
-
+             dBservices = new DBservices();
         }
         /// <summary>
         /// הכנסה לדטה בייס
         /// </summary>
         public void insertToDb(List<Destinations> destinations)
         {
-            DBservices dBservices = new DBservices();
             dBservices.insert(destinations);
         }
 
+        internal List<Destinations> GetFromDBDestinations()
+        {
+           return dBservices.importData();
+        }
     }
 }

@@ -12,6 +12,7 @@
 
         $(document).ready(function () {
             getDestination();//משיג רשימת יעדים לפני הכל
+            GetDestinationsFromDb();//אחרי שסיימנו להכניס לדטה בייס נקרא משם את כל הנתונים
             $("#Search").click(function () {
                 getFlights();
             });
@@ -52,6 +53,20 @@
         }
 
 
+        //אחרי שסיימנו להכניס לדטה בייס נקרא משם את כל הנתונים
+        function GetDestinationsFromDb(){
+         
+            ajaxCall("GET", `../api/Flight/Getdestination`, showDestinationsSuccess, showDestinationsError)
+        }
+
+        function showDestinationsSuccess(data) {
+            console.log("hey");
+            console.log(data);
+        }
+
+        function showDestinationsError(e) {
+            console.log(e);
+        }
 
         //קבלת שמות של כל ערי הטיסות
         function getFlights() {
@@ -198,8 +213,11 @@
         עצירה ב: <input type="text" name="Dest" id="Connection"><br>
 
         יציאה: <input type="date" id="DateFrom"><br>
-        חזור:<input type="date" id="DateTo"><br /> 
-        <input type="button" value="חפש" id="Search"  />
+        חזור:<input type="date" id="DateTo"><br />
+
+        עיר: <input type="text" name="Dest" id="Destination"><br>
+
+        <input type="button" value="חפש" id="Search" />
         <input type="button" value="הצג טיסות" id="Show" />
         <input type="button" value="הצג עם עצירות" id="ConButton" />
     </div>
