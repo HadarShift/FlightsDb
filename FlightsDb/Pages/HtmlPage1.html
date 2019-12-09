@@ -11,6 +11,7 @@
 
 
         $(document).ready(function () {
+            getDestination();//משיג רשימת יעדים לפני הכל
             $("#Search").click(function () {
                 getFlights();
             });
@@ -28,7 +29,28 @@
             this.Price = Price;
         }
 
-        
+        function getDestination() {
+            UrlDest = "https://api.skypicker.com/locations?type=dump&locale=en-US&location_types=airport&limit=4000&active_only=true&sort=name";
+            $.get(UrlDest).done(successCB);
+            $.get(UrlDest).fail(errorCB);
+        }
+        function successCB(data) {
+            console.log(data);
+            //let result = data.locations.map(a => a.city.name, a.code);
+            result = data.locations.map(a => obj={
+                "City": a.city.name,
+                "Code": a.code,
+                "LenLat": a.location.lat,
+                "LenLon": a.location.lon
+            })
+            
+
+        }
+        function errorCB(err) {
+            console.log(err);
+        }
+
+
 
         //קבלת שמות של כל ערי הטיסות
         function getFlights() {

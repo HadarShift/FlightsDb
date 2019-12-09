@@ -1,0 +1,40 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+
+    <script src="ajaxCalls.js"></script>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"
+            integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+            crossorigin="anonymous"></script>
+
+
+    <script>
+
+
+
+        $(document).ready(function () {
+            url = "https://api.skypicker.com/locations?type=dump&locale=en-US&location_types=airport&limit=4000&active_only=true&sort=name";
+            $.get(url).done(successCB);
+            $.get(url).fail(errorCB);
+            
+        });
+
+
+        function successCB(data) {
+            console.log(data);
+        }
+        function errorCB(err) {
+            console.log(err);
+        }
+
+
+
+    </script>
+
+</head>
+<body>
+
+</body>
+</html>
