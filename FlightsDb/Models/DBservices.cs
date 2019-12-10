@@ -134,6 +134,7 @@ public class DBservices
             {
                 // close the db connection
                 con.Close();
+
             }
         }
 
@@ -195,6 +196,7 @@ public class DBservices
                     objDest.LenLon = double.Parse(reader["Leclong"].ToString());
                     objDest.Code = reader["code"].ToString();
                     destinationsList.Add(objDest);
+                    objDest = new Destinations();
                 }
             }
             else
