@@ -106,7 +106,7 @@
             str = "";
             for (var i = 0; i < data1.length; i++) {
 
-                str += `<div class="Flights" id=${i}>
+                str += `<div class="Flights" id=${i} accessKey =${data1[i]["id"]}>
                                <h1 id=from${i}>${data1[i]["cityFrom"]}</h1>
                                 <h1 id=to${i}> to ${data1[i]["cityTo"]}</h1>
                                <h3 id=dateD${i}>date Departure: ${new Date(data1[i].dTimeUTC * 1000)} </h3><h3 id=dateA${i}> and arrive at: ${new Date(data1[i].aTimeUTC * 1000)}</h3>
@@ -148,10 +148,9 @@
         }
 
         function addFlight(id) {
-            for (var i = 0; i < length; i++) {
-
-            }
+           
             var flight = {
+                "FlightId": document.getElementById(id).accessKey,
                 "Price": document.getElementById(`Price${id}`).textContent,
                 "cityFrom": document.getElementById(`from${id}`).textContent,
                 "cityTo": document.getElementById(`to${id}`).textContent,
@@ -161,6 +160,7 @@
                 //"subflights": document.getElementById(`subflights${index}`).innerHTML,
                 //"airlines": document.getElementById(`airlines${index}`).textContent
             }
+      
             ajaxCall("POST", "../api/Flight", JSON.stringify(flight), postFlightsSuccess, postFlightsError);
         }
 

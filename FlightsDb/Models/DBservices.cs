@@ -22,7 +22,7 @@ public class DBservices
         //
     }
 
-  
+
 
     //--------------------------------------------------------------------------------------------------
     // This method creates a connection to the database according to the connectionString name in the web.config 
@@ -89,6 +89,9 @@ public class DBservices
     //--------------------------------------------------------------------------------------------------
     // This method inserts a car to the movie table CLASSEX
     //--------------------------------------------------------------------------------------------------
+    /// <summary>
+    /// הכנסת יעדים לפני העלאת התוכנית
+    /// </summary>
     public int insert(List<Destinations> destinations)
     {
 
@@ -140,6 +143,71 @@ public class DBservices
 
     }
 
+    /// <summary>
+    /// שמירת טיסות ששבחרתי
+    /// </summary>
+    public int SaveFlight(Flights flight)
+    {
+        SqlConnection con;
+        SqlCommand cmd;
+
+        try
+        {
+            con = connect("destinationsDBConnectionString"); // create the connection
+        }
+        catch (Exception ex)
+        {
+            // write to log
+            throw (ex);
+        }
+
+        try
+        {
+            String cStr = "";
+            int numEffected = 0;
+            cStr = BuildSaveFlightQry(flight);      // שומר את הטיסה שבחרתי
+            cmd = CreateCommand(cStr, con);             // create the command
+            numEffected += cmd.ExecuteNonQuery(); // execute the command
+            //שמירת הקונקשיינים של הטיסה שבחרתי
+            string cityFrom="",cityTo="";
+             for (int i = 0; i < flight.Routes.Count; i++)
+            {
+
+                if (i == 0)
+                    cityFrom = flight.cityFrom;
+                else
+                    cityFrom = flight.Routes[i-1].ToString();
+                if(i != flight.Routes.Count - 1)
+                    cityTo = flight.Routes[i].ToString();
+                else  
+                    cityTo = flight.cityTo;
+
+                cStr = BuildConncectionRoutes(flight.FlightId,cityFrom,cityTo);
+                cmd = CreateCommand(cStr, con);             // create the command
+                numEffected += cmd.ExecuteNonQuery();
+            }
+
+            return numEffected;
+        }
+
+        catch (Exception ex)
+        {
+            return 0;
+            // write to log
+            throw (ex);
+        }
+
+        finally
+        {
+            if (con != null)
+            {
+                // close the db connection
+                con.Close();
+
+            }
+        }
+    }
+
 
     //--------------------------------------------------------------------
     // Build the Insert command method String for MOVIE CLASSEX
@@ -156,7 +224,40 @@ public class DBservices
             prefix = "INSERT INTO Airport_2020 " + "(city, Lenlot,Leclong,code) ";
             command = prefix + sb.ToString();
 
-        
+        return command;
+    }
+
+    /// <summary>
+    /// בניית שאילתה עבור הכנסת טיסות שאני רוצה
+    /// </summary>
+    private String BuildSaveFlightQry(Flights flight)
+    {
+
+        String command;
+
+        StringBuilder sb = new StringBuilder();
+        // use a string builder to create the dynamic string
+        String prefix = "";
+        sb.AppendFormat("Values('{0}','{1}','{2}','{3}','{4}')",flight.FlightId,flight.dateFrom,flight.dateUntil,flight.cityFrom,flight.cityTo);
+        prefix = "INSERT INTO MyFlights " + "(FlightNum,DateFrom,DateTo,CityFrom,CityTo) ";
+        command = prefix + sb.ToString();
+
+        return command;
+    }
+    /// <summary>
+    /// קונקשיינים
+    /// </summary>
+    private String BuildConncectionRoutes(string FlightId, string cityFrom,string cityTo)
+    {
+
+        String command;
+
+        StringBuilder sb = new StringBuilder();
+        // use a string builder to create the dynamic string
+        String prefix = "";
+        sb.AppendFormat("Values('{0}','{1}','{2}')", FlightId, cityFrom, cityTo);
+        prefix = "INSERT INTO RoutesConnection " + "(FlightNum,CityFrom,CityTo) ";
+        command = prefix + sb.ToString();
 
         return command;
     }
@@ -262,4 +363,84 @@ public class DBservices
 
         return cmd;
     }
+
+    /// <summary>
+    /// מחזיר טיסות שבחרתי
+    /// </summary>
+    internal List<Flights> ReturnFlightsChosen()
+    {
+        List<Flights> FlightsList = new List<Flights>();
+        Flights objFlight = new Flights();
+        SqlConnection con;
+        SqlCommand cmd;
+
+        try
+        {
+            con = connect("destinationsDBConnectionString"); // create the connection
+        }
+        catch (Exception ex)
+        {
+            // write to log
+            throw (ex);
+        }
+
+        try
+        {
+            String cStr = $@"SELECT *
+                             FROM [dbo].[MyFlights]";
+            cmd = CreateCommand(cStr, con);             // create the command
+            SqlDataReader reader2 = cmd.ExecuteReader();
+            SqlDataReader readerForRoutes;
+            if (reader2.HasRows)
+            {
+                while (reader2.Read())
+                {
+                    objFlight.FlightId = reader2["FlightNum"].ToString();
+                    objFlight.dateFrom = reader2["DateFrom"].ToString();
+                    objFlight.dateUntil = reader2["DateTo"].ToString();
+                    objFlight.cityFrom = reader2["CityFrom"].ToString();
+                    objFlight.cityTo= reader2["CityTo"].ToString();
+                    //לאסוף את הקונקשיינים של אותה טיסה
+                    cStr = $@"SELECT *
+                            FROM [dbo].[MyFlights] as F inner join [dbo].[RoutesConnection] as R on F.FlightNum=R.FlightNum
+                            WHERE F.FlightNum='{reader2["FlightNum"].ToString()}'";
+                    cmd = CreateCommand(cStr, con);             // create the command
+                    readerForRoutes = cmd.ExecuteReader();
+                    if(readerForRoutes.HasRows)
+                    {
+                        while (reader2.Read())
+                        {
+                            objFlight.Routes.Add(readerForRoutes["CityTo"].ToString());
+                        }
+                        readerForRoutes.Close();
+                    }
+                    FlightsList.Add(objFlight);
+                    objFlight = new Flights();
+                }
+            }
+            else
+            {
+                Console.WriteLine("No rows found.");
+            }
+            reader2.Close();
+
+        }
+
+        catch (Exception ex)
+        {
+            // write to log
+            throw (ex);
+        }
+
+        finally
+        {
+            if (con != null)
+            {
+                // close the db connection
+                con.Close();
+            }
+        }
+        return FlightsList;
+    }
+
 }

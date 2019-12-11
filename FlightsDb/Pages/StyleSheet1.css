@@ -5,7 +5,7 @@
 }
 
 #start {
-    background-color: rebeccapurple
+    background-color: gainsboro
 }
 .container p {
     display: inline
@@ -16,7 +16,7 @@
 }
 
 body {
-    font: 16px Arial;
+    font: 20px Arial;
 }
 
 .autocomplete {
@@ -26,10 +26,10 @@ body {
 }
 
 input {
-    border: 1px solid transparent;
+    border: 1px solid ;
     background-color: #f1f1f1;
     padding: 10px;
-    font-size: 32px;
+    font-size: 20px;
 }
 
     input[type=text] {

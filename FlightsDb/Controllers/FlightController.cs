@@ -10,12 +10,12 @@ namespace FlightsDb.Controllers
 {
     public class FlightController : ApiController
     {
-        Flights flight = new Flights();
+        Flights flightObj = new Flights();
 
         // GET api/values
         public List<Flights> Get()
         {
-            return flight.getFlightList();
+            return flightObj.getFlightList();
         }
 
         // GET api/values/5
@@ -28,15 +28,15 @@ namespace FlightsDb.Controllers
         [Route ("api/flight/stop/{city}")]
         public List<Flights> getFilteredRoutes(string city)
         {
-            return flight.getFilteredConnection(city);//שולח עיר לסינון
+            return flightObj.getFilteredConnection(city);//שולח עיר לסינון
             
         }
 
         // POST api/values
-        public void Post([FromBody]Flights flights)
+        public void Post([FromBody]Flights flight)
         {
-            Flights.flightsList.Add(flights);
-
+            //Flights.flightsList.Add(flight);
+            flightObj.SaveFlight(flight);
         }
         /// <summary>
         /// שמירת יעדים בדטה בייס
