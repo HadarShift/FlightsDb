@@ -115,7 +115,10 @@ public class DBservices
             int numEffected = 0;
             foreach (var item in destinations)
             {
-
+                if (counter == 681)
+                {
+                    
+                }
                 cStr = BuildInsertCommand(item);      // helper method to build the insert string
                 cmd = CreateCommand(cStr, con);             // create the command
                 numEffected += cmd.ExecuteNonQuery(); // execute the command
