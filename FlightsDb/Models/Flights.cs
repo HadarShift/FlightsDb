@@ -21,6 +21,7 @@ namespace FlightsDb.Models
         {
             DBservices dBservices = new DBservices();
             flightsList= dBservices.ReturnFlightsChosen();
+            flightsList = dBservices.AddConnenctionRoutes(flightsList);
             return flightsList;
         }
 
@@ -44,6 +45,11 @@ namespace FlightsDb.Models
         {
             DBservices dBservices = new DBservices();
             dBservices.SaveFlight(flights);
+        }
+
+        public void InitialRoutesList()
+        {
+            Routes = new List<string>();
         }
     }
 }

@@ -204,6 +204,7 @@
     <Content Include="Global.asax" />
     <Content Include="Pages\getAirports.html" />
     <Content Include="Pages\HtmlPage1.html" />
+    <Content Include="Pages\insert - with validation.html" />
     <Content Include="Pages\StyleSheet1.css" />
     <Content Include="Scripts\ajaxCalls.js" />
     <Content Include="Scripts\bootstrap.js" />

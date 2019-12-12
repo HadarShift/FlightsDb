@@ -1,0 +1,130 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>DB Example</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <script src="../Scripts/ajaxCalls.js"></script>
+
+    <style type="text/css">
+
+        .red-star {
+            color: red;
+        }
+
+    </style>
+
+
+    <script>
+
+        $(document).ready(function () {
+
+            $("#pForm").submit(f1); // bind the submit event to a function called f1
+
+            // activate a custom validation function when the element looses focus.
+            $("#code").on("blur", checkCode);  
+        });
+
+        function checkCode() {
+            genderVal = $("#gender").val();
+            if (this.value % 100 == 99 && genderVal == 1 ) { // an example of validation that the code divides by 3
+                this.validity.valid = true;
+                this.setCustomValidity('');
+            }
+            else {
+                this.validity.valid = false; // must set it to false to prevent the submit to the server
+                this.setCustomValidity('Code is not valid, please enter a valid code');
+
+            }
+        }
+
+        function AddCar() {
+            // createa a JSON object called Car
+            Car = { // Note that the name of the fields must be identical to the names of the properties of the object in the server
+                Model: $("#model").val(),
+                Manufacturer: $("#manufacturer").val(),
+                Price: parseFloat($("#price").val()),
+                Year: parseInt($("#year").val())
+            }
+            //ajaxCall("POST", "../api/cars", JSON.stringify(Car), success, error);
+            swal("Submitted to the server!", "Great Job", "success");
+
+        }
+
+        // This function is called in case of a success
+        function success(data) {
+            swal("Added Successfuly!", "Great Job", "success");
+        }
+
+        // This function is called in case of an error
+        function error(err) {
+            alert("error");
+        }
+
+        function f1() {
+            AddCar();
+            
+            return false; // the return false will prevent the form from being submitted
+            // hence the page will not reload
+        }
+
+    </script>
+
+</head>
+<body>
+
+    <nav class="navbar navbar-default">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="#">Validation Example</a>
+            </div>
+            <ul class="nav navbar-nav">
+                <li class="active"><a href="insert.html">Insert</a></li>
+                <li><a href="show.html">Inventory</a></li>
+                <li><a href="discount.html">Discount</a></li>
+            </ul>
+        </div>
+    </nav>
+
+
+    <div class="container">
+        <form id="pForm">
+            <div class="form-group">
+                <label for="id"><span class="red-star">★ </span>ID</label>
+                <input type="number" class="form-control" id="id" placeholder="Enter the id" required />
+            </div>
+            <div class="form-group">
+                <label for="gender"><span class="red-star">★ </span>Gender</label>
+                <select id="gender" required>
+                    <option value="">Choose gender</option>
+                    <option value="1">male</option>
+                    <option value="2">female</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="code"> code (using a custom validator)</label>
+                <input type="text" class="form-control" id="code" placeholder="Enter the discount code" />
+            </div>
+
+            <div class="form-group">
+                <label for="fName">Family name (using a pattern validator)</label>
+                <input type="tel" class="form-control" placeholder="Enter the family name that starts with ab" id="fName"
+                       pattern="^ab.*"
+                       oninvalid="this.setCustomValidity('Format should start with ab')"
+                       oninput="this.setCustomValidity('')" />
+            </div>
+
+            <input type="submit" value="Submit BTN" />
+            <!--<button>Press Me</button> will also submit-->
+            <!--<input type="button" value="what about me???" /> will not submit-->
+        </form>
+    </div>
+
+
+</body>
+</html>
