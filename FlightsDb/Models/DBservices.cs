@@ -14,13 +14,14 @@ public class DBservices
 {
     public SqlDataAdapter da;
     public DataTable dt;
-
+    int counter = 0;
     public DBservices()
     {
         //
         // TODO: Add constructor logic here
         //
     }
+
 
 
 
@@ -114,6 +115,10 @@ public class DBservices
             int numEffected = 0;
             foreach (var item in destinations)
             {
+                if (counter == 681)
+                {
+
+                }
                 cStr = BuildInsertCommand(item);      // helper method to build the insert string
                 cmd = CreateCommand(cStr, con);             // create the command
                 numEffected += cmd.ExecuteNonQuery(); // execute the command
@@ -122,7 +127,7 @@ public class DBservices
 
 
             return numEffected;
-            }
+        }
 
         catch (Exception ex)
         {
@@ -169,20 +174,20 @@ public class DBservices
             cmd = CreateCommand(cStr, con);             // create the command
             numEffected += cmd.ExecuteNonQuery(); // execute the command
             //שמירת הקונקשיינים של הטיסה שבחרתי
-            string cityFrom="",cityTo="";
-             for (int i = 0; i < flight.Routes.Count; i++)
+            string cityFrom = "", cityTo = "";
+            for (int i = 0; i < flight.Routes.Count; i++)
             {
 
                 if (i == 0)
                     cityFrom = flight.cityFrom;
                 else
-                    cityFrom = flight.Routes[i-1].ToString();
-                if(i != flight.Routes.Count - 1)
+                    cityFrom = flight.Routes[i - 1].ToString();
+                if (i != flight.Routes.Count - 1)
                     cityTo = flight.Routes[i].ToString();
-                else  
+                else
                     cityTo = flight.cityTo;
 
-                cStr = BuildConncectionRoutes(flight.FlightId,cityFrom,cityTo);
+                cStr = BuildConncectionRoutes(flight.FlightId, cityFrom, cityTo);
                 cmd = CreateCommand(cStr, con);             // create the command
                 numEffected += cmd.ExecuteNonQuery();
             }
@@ -219,10 +224,13 @@ public class DBservices
 
         StringBuilder sb = new StringBuilder();
         // use a string builder to create the dynamic string
-        String prefix = "";       
-            sb.AppendFormat("Values('{0}',{1},{2},'{3}')", destination.City, destination.LenLat, destination.LenLon, destination.Code);
-            prefix = "INSERT INTO Airport_2020 " + "(city, Lenlot,Leclong,code) ";
-            command = prefix + sb.ToString();
+        String prefix = "";
+        destination.City = destination.City.Replace("'", "''");
+
+        sb.AppendFormat("Values('{0}',{1},{2},'{3}')", destination.City, destination.LenLat, destination.LenLon, destination.Code);
+        prefix = "INSERT INTO Airport_2020 " + "(city, Lenlot,Leclong,code) ";
+        command = prefix + sb.ToString();
+        counter++;
 
         return command;
     }
@@ -238,7 +246,7 @@ public class DBservices
         StringBuilder sb = new StringBuilder();
         // use a string builder to create the dynamic string
         String prefix = "";
-        sb.AppendFormat("Values('{0}','{1}','{2}','{3}','{4}')",flight.FlightId,flight.dateFrom,flight.dateUntil,flight.cityFrom,flight.cityTo);
+        sb.AppendFormat("Values('{0}','{1}','{2}','{3}','{4}')", flight.FlightId, flight.dateFrom, flight.dateUntil, flight.cityFrom, flight.cityTo);
         prefix = "INSERT INTO MyFlights " + "(FlightNum,DateFrom,DateTo,CityFrom,CityTo) ";
         command = prefix + sb.ToString();
 
@@ -247,7 +255,7 @@ public class DBservices
     /// <summary>
     /// קונקשיינים
     /// </summary>
-    private String BuildConncectionRoutes(string FlightId, string cityFrom,string cityTo)
+    private String BuildConncectionRoutes(string FlightId, string cityFrom, string cityTo)
     {
 
         String command;
@@ -292,10 +300,10 @@ public class DBservices
             {
                 while (reader.Read())
                 {
-                    objDest.City = reader["City"].ToString();
-                    objDest.LenLat = double.Parse(reader["Lenlat"].ToString());
-                    objDest.LenLon = double.Parse(reader["LenLon"].ToString());
-                    objDest.Code = reader["Code"].ToString();
+                    objDest.City = reader["city"].ToString();
+                    objDest.LenLat = double.Parse(reader["Lenlot"].ToString());
+                    objDest.LenLon = double.Parse(reader["Leclong"].ToString());
+                    objDest.Code = reader["code"].ToString();
                     destinationsList.Add(objDest);
                     objDest = new Destinations();
                 }
@@ -323,7 +331,7 @@ public class DBservices
             }
         }
         return destinationsList;
-   
+
     }
     //--------------------------------------------------------------------
     // Build the Insert command method String for MOVIE CLASSEX
@@ -389,8 +397,8 @@ public class DBservices
             String cStr = $@"SELECT *
                              FROM [dbo].[MyFlights]";
             cmd = CreateCommand(cStr, con);             // create the command
-            SqlDataReader reader2 = cmd.ExecuteReader();
-            SqlDataReader readerForRoutes;
+            SqlDataReader reader2;
+            reader2 = cmd.ExecuteReader();
             if (reader2.HasRows)
             {
                 while (reader2.Read())
@@ -399,21 +407,8 @@ public class DBservices
                     objFlight.dateFrom = reader2["DateFrom"].ToString();
                     objFlight.dateUntil = reader2["DateTo"].ToString();
                     objFlight.cityFrom = reader2["CityFrom"].ToString();
-                    objFlight.cityTo= reader2["CityTo"].ToString();
-                    //לאסוף את הקונקשיינים של אותה טיסה
-                    cStr = $@"SELECT *
-                            FROM [dbo].[MyFlights] as F inner join [dbo].[RoutesConnection] as R on F.FlightNum=R.FlightNum
-                            WHERE F.FlightNum='{reader2["FlightNum"].ToString()}'";
-                    cmd = CreateCommand(cStr, con);             // create the command
-                    readerForRoutes = cmd.ExecuteReader();
-                    if(readerForRoutes.HasRows)
-                    {
-                        while (reader2.Read())
-                        {
-                            objFlight.Routes.Add(readerForRoutes["CityTo"].ToString());
-                        }
-                        readerForRoutes.Close();
-                    }
+                    objFlight.cityTo = reader2["CityTo"].ToString();
+                    objFlight.InitialRoutesList();//מאתחל רשימת קונקשיינים ואחר כך יכניס אותם
                     FlightsList.Add(objFlight);
                     objFlight = new Flights();
                 }
@@ -423,6 +418,8 @@ public class DBservices
                 Console.WriteLine("No rows found.");
             }
             reader2.Close();
+
+
 
         }
 
@@ -441,6 +438,44 @@ public class DBservices
             }
         }
         return FlightsList;
+    }
+    /// <summary>
+    /// מוסיף לרשימת טיסות שבחרתי את הקונקשיינים
+    /// </summary>
+    /// <returns></returns>
+    internal List<Flights> AddConnenctionRoutes(List<Flights> FligthsList)
+    {
+        SqlConnection con;
+        SqlCommand cmd;
+        try
+        {
+            con = connect("destinationsDBConnectionString"); // create the connection
+        }
+        catch (Exception ex)
+        {
+            // write to log
+            throw (ex);
+        }
+
+        //לאסוף את הקונקשיינים של אותה טיסה
+        string cStr = "";
+        for (int i = 0; i < FligthsList.Count; i++)
+        {
+            cStr = $@"SELECT R.CityTo
+                        FROM [dbo].[MyFlights] as F inner join [dbo].[RoutesConnection] as R on F.FlightNum=R.FlightNum
+                        WHERE F.FlightNum='{FligthsList[i].FlightId.ToString()}'";
+            cmd = CreateCommand(cStr, con);// create the command
+            SqlDataReader readerForRoutes = cmd.ExecuteReader();
+            if (readerForRoutes.HasRows)
+            {
+                while (readerForRoutes.Read())
+                {
+                    FligthsList[i].Routes.Add(readerForRoutes["CityTo"].ToString());
+                }
+                readerForRoutes.Close();
+            }
+        }
+        return FligthsList;
     }
 
 }
